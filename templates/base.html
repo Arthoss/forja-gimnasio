@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}FORJA Gimnasio{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav class="nav">
+        <div class="wrap">
+            <a href="{% url 'portada' %}" class="brand">FORJA<span>.</span></a>
+            <div class="links">
+                <a href="{% url 'gimnasio:index' %}">Clases</a>
+                <a href="{% url 'ejercicios:index' %}">Ejercicios</a>
+                <a href="{% url 'gimnasio:motivacion' %}">Motivación</a>
+            </div>
+        </div>
+    </nav>
+    {% block content %}{% endblock %}
+    <footer class="site">
+        <div class="wrap">Proyecto académico FORJA Gimnasio — construido con Django.</div>
+    </footer>
+</body>
+</html>

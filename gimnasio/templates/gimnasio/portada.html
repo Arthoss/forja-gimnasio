@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}FORJA — Entrena distinto{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="wrap">
+        <h1>ENTRENA CON<br>PROPÓSITO</h1>
+        <p class="lead">Clases en vivo con instructores reales y una biblioteca de ejercicios organizada por grupo muscular, para que armes tu propia rutina.</p>
+        <a href="{% url 'gimnasio:index' %}" class="btn">Ver clases</a>
+        <a href="{% url 'ejercicios:index' %}" class="btn outline">Explorar ejercicios</a>
+
+        <div class="stats">
+            <div>
+                <span class="num">{{ total_clases }}</span>
+                <span class="label">clases activas</span>
+            </div>
+            <div>
+                <span class="num">{{ total_inscripciones }}</span>
+                <span class="label">inscripciones</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

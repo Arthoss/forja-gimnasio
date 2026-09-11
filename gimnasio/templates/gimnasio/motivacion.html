@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Motivación — FORJA{% endblock %}
+{% block content %}
+<div class="wrap section">
+    <h2>Frase del día</h2>
+    <blockquote class="quote">
+        "{{ frase.content }}"
+        <footer>— {{ frase.author }}</footer>
+    </blockquote>
+    <p class="meta">Esta frase se obtiene consultando el microservicio externo api.quotable.io</p>
+</div>
+{% endblock %}

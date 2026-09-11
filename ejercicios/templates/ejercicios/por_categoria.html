@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ categoria.nombre }} — FORJA{% endblock %}
+{% block content %}
+<div class="wrap section">
+    <p class="breadcrumb"><a href="{% url 'ejercicios:index' %}">Ejercicios</a> / {{ categoria.nombre }}</p>
+    <h2>{{ categoria.nombre }}</h2>
+    <p class="meta">{{ categoria.descripcion }}</p>
+
+    <div class="filters">
+        <a href="{% url 'ejercicios:por_categoria' categoria.id %}" class="{% if not nivel_actual %}active{% endif %}">Todos</a>
+        {% for valor, etiqueta in niveles %}
+            <a href="{% url 'ejercicios:por_categoria' categoria.id %}?nivel={{ valor }}" class="{% if nivel_actual == valor %}active{% endif %}">{{ etiqueta }}</a>
+        {% endfor %}
+    </div>
+
+    {% if ejercicios %}
+        {% for ejercicio in ejercicios %}
+            <a href="{% url 'ejercicios:detail' ejercicio.id %}" style="text-decoration:none;">
+                <div class="row-card">
+                    <div>
+                        <div class="title">{{ ejercicio.nombre }}</div>
+                        <div class="meta">{{ ejercicio.series }} series × {{ ejercicio.repeticiones }} repeticiones</div>
+                    </div>
+                    <div class="side"><span class="pill nivel-{{ ejercicio.nivel }}">{{ ejercicio.get_nivel_display }}</span></div>
+                </div>
+            </a>
+        {% endfor %}
+    {% else %}
+        <p>No hay ejercicios que coincidan con ese filtro.</p>
+    {% endif %}
+</div>
+{% endblock %}

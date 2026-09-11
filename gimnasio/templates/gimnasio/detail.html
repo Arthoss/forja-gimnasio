@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ clase.nombre }} — FORJA{% endblock %}
+{% block content %}
+<div class="wrap section">
+    <p class="breadcrumb"><a href="{% url 'gimnasio:index' %}">Clases</a> / {{ clase.nombre }}</p>
+
+    <h2>{{ clase.nombre }}</h2>
+    <p class="meta">Instructor: {{ clase.instructor }} · {{ clase.cupos_disponibles }} de {{ clase.cupo_maximo }} cupos disponibles</p>
+    <p>{{ clase.descripcion }}</p>
+
+    {% if error_message %}<div class="error">{{ error_message }}</div>{% endif %}
+
+    <form class="inscripcion" action="{% url 'gimnasio:inscribirse' clase.id %}" method="post">
+        {% csrf_token %}
+        <label for="nombre_miembro">Tu nombre:</label><br><br>
+        <input type="text" id="nombre_miembro" name="nombre_miembro">
+        <input type="submit" value="Inscribirme">
+    </form>
+
+    <h3>Miembros inscritos</h3>
+    {% for inscripcion in clase.inscripcion_set.all %}
+        <div class="row-card">
+            <div class="title">{{ inscripcion.nombre_miembro }}</div>
+            <div class="side">{{ inscripcion.fecha_inscripcion }}</div>
+        </div>
+    {% empty %}
+        <p class="meta">Aún no hay inscritos.</p>
+    {% endfor %}
+</div>
+{% endblock %}

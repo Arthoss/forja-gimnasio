@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Clases — FORJA{% endblock %}
+{% block content %}
+<div class="wrap section">
+    <div class="section-head">
+        <h2>Clases disponibles</h2>
+        <span class="muted">{{ lista_clases|length }} en total</span>
+    </div>
+
+    {% if lista_clases %}
+        {% for clase in lista_clases %}
+            <a href="{% url 'gimnasio:detail' clase.id %}" style="text-decoration:none;">
+                <div class="row-card">
+                    <div>
+                        <div class="title">{{ clase.nombre }}</div>
+                        <div class="meta">Instructor: {{ clase.instructor }}</div>
+                    </div>
+                    <div class="side">{{ clase.cupos_disponibles }} cupos libres</div>
+                </div>
+            </a>
+        {% endfor %}
+    {% else %}
+        <p>No hay clases disponibles por el momento.</p>
+    {% endif %}
+</div>
+{% endblock %}

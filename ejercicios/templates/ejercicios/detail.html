@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ ejercicio.nombre }} — FORJA{% endblock %}
+{% block content %}
+<div class="wrap section">
+    <p class="breadcrumb">
+        <a href="{% url 'ejercicios:index' %}">Ejercicios</a> /
+        <a href="{% url 'ejercicios:por_categoria' ejercicio.categoria.id %}">{{ ejercicio.categoria.nombre }}</a> /
+        {{ ejercicio.nombre }}
+    </p>
+
+    <h2>{{ ejercicio.nombre }}</h2>
+    <span class="pill nivel-{{ ejercicio.nivel }}">{{ ejercicio.get_nivel_display }}</span>
+    <p style="margin-top:16px;">{{ ejercicio.descripcion }}</p>
+    <p class="meta">{{ ejercicio.series }} series × {{ ejercicio.repeticiones }} repeticiones</p>
+
+    {% if relacionados %}
+        <h3 style="margin-top:36px;">Otros ejercicios de {{ ejercicio.categoria.nombre }}</h3>
+        {% for otro in relacionados %}
+            <a href="{% url 'ejercicios:detail' otro.id %}" style="text-decoration:none;">
+                <div class="row-card">
+                    <div class="title">{{ otro.nombre }}</div>
+                    <div class="side"><span class="pill nivel-{{ otro.nivel }}">{{ otro.get_nivel_display }}</span></div>
+                </div>
+            </a>
+        {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

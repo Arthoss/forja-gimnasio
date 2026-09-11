@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Ejercicios — FORJA{% endblock %}
+{% block content %}
+<div class="wrap section">
+    <div class="section-head">
+        <h2>Catálogo de ejercicios</h2>
+        <span class="muted">por categoría</span>
+    </div>
+
+    {% if lista_categorias %}
+        {% for categoria in lista_categorias %}
+            <a href="{% url 'ejercicios:por_categoria' categoria.id %}" style="text-decoration:none;">
+                <div class="row-card">
+                    <div>
+                        <div class="title">{{ categoria.nombre }}</div>
+                        <div class="meta">{{ categoria.descripcion }}</div>
+                    </div>
+                    <div class="side">{{ categoria.ejercicios.count }} ejercicios</div>
+                </div>
+            </a>
+        {% endfor %}
+    {% else %}
+        <p>Aún no hay categorías registradas. Créalas desde el admin.</p>
+    {% endif %}
+</div>
+{% endblock %}
