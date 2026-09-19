@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Tip del día — FORJA{% endblock %}
+{% block content %}
+<div class="wrap section">
+    <h2>Tip del día</h2>
+    <p>{{ tip.texto }}</p>
+    <p class="meta">Categoría: {{ tip.categoria }}</p>
+</div>
+{% endblock %}

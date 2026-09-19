@@ -66,3 +66,15 @@ def portada(request):
         "total_clases": total_clases,
         "total_inscripciones": total_inscripciones,
     })
+
+def tip_del_dia(request):
+    """Consume el microservicio propio (Flask + Supabase) para mostrar un tip aleatorio."""
+    url_microservicio = "https://forja-microservicio.onrender.com/api/tip"
+    tip_por_defecto = {"texto": "Entrena con constancia, los resultados llegan solos.", "categoria": "general"}
+    try:
+        respuesta = requests.get(url_microservicio, timeout=6)
+        respuesta.raise_for_status()
+        tip = respuesta.json()
+    except requests.RequestException:
+        tip = tip_por_defecto
+    return render(request, "gimnasio/tip_del_dia.html", {"tip": tip})
