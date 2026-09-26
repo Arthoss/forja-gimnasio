@@ -7,6 +7,8 @@
         <span class="muted">{{ lista_clases|length }} en total</span>
     </div>
 
+    <a href="{% url 'gimnasio:clase_crear' %}" class="btn">+ Nueva clase</a>
+
     {% if lista_clases %}
         {% for clase in lista_clases %}
             <a href="{% url 'gimnasio:detail' clase.id %}" style="text-decoration:none;">

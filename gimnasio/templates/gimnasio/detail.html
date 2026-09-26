@@ -1,6 +1,12 @@
 {% extends "base.html" %}
 {% block title %}{{ clase.nombre }} — FORJA{% endblock %}
 {% block content %}
+
+<div class="btn-row">
+    <a href="{% url 'gimnasio:clase_editar' clase.id %}" class="btn small">Editar clase</a>
+    <a href="{% url 'gimnasio:clase_eliminar' clase.id %}" class="btn-danger">Eliminar clase</a>
+</div>
+
 <div class="wrap section">
     <p class="breadcrumb"><a href="{% url 'gimnasio:index' %}">Clases</a> / {{ clase.nombre }}</p>
 

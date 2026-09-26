@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Eliminar clase — FORJA{% endblock %}
+{% block content %}
+<div class="wrap section">
+    <h2>¿Eliminar "{{ clase.nombre }}"?</h2>
+    <p class="meta">Esta acción no se puede deshacer. Se perderán también todas las inscripciones asociadas.</p>
+    <form method="post">
+        {% csrf_token %}
+        <div class="btn-row">
+            <button type="submit" class="btn-danger" style="border:none; cursor:pointer;">Sí, eliminar definitivamente</button>
+            <a href="{% url 'gimnasio:detail' clase.id %}" class="btn small outline">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

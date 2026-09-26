@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ modo }} clase — FORJA{% endblock %}
+{% block content %}
+<div class="wrap section">
+    <h2>{{ modo }} clase</h2>
+    <form method="post" class="inscripcion">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="btn-row">
+            <button type="submit" class="btn" style="border:none; cursor:pointer;">Guardar</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

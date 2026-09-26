@@ -10,4 +10,7 @@ urlpatterns = [
     path("motivacion/", views.motivacion, name="motivacion"),
     path("tip-del-dia/", views.tip_del_dia, name="tip_del_dia"),
     path("preguntas/", views.preguntas, name="preguntas"),
+    path("clases/nueva/", views.clase_crear, name="clase_crear"),
+    path("<int:clase_id>/editar/", views.clase_editar, name="clase_editar"),
+    path("<int:clase_id>/eliminar/", views.clase_eliminar, name="clase_eliminar"),
 ]

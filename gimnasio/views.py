@@ -3,8 +3,10 @@ import os
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-
+from django.shortcuts import redirect
+from .forms import ClaseForm
 from .models import Clase, Inscripcion
+from django.urls import reverse
 
 
 def index(request):
@@ -81,7 +83,8 @@ def tip_del_dia(request):
     return render(request, "gimnasio/tip_del_dia.html", {"tip": tip})
 
 def preguntas(request):
-    """Vista tipo chat: el usuario pregunta sobre rutinas/ejercicios y una IA externa responde."""
+    """Vista tipo chat: la IA responde usando el contexto real de la base de datos,
+    obtenido consultando nuestro propio endpoint público /api/clases/."""
     respuesta = None
     pregunta = ""
 
@@ -89,15 +92,36 @@ def preguntas(request):
         pregunta = request.POST.get("pregunta", "").strip()
 
         if pregunta:
+            # 1) Consultamos nuestro propio endpoint público para traer datos reales y actuales
+            url_clases = request.build_absolute_uri(reverse("api_lista_clases"))
+            contexto_datos = "No se pudo obtener información de las clases en este momento."
+            try:
+                resp_clases = requests.get(url_clases, timeout=8)
+                resp_clases.raise_for_status()
+                clases = resp_clases.json()
+                lineas = []
+                for c in clases:
+                    lineas.append(
+                        f"- {c['nombre']} (instructor: {c['instructor']}): "
+                        f"{c['cupos_disponibles']} de {c['cupo_maximo']} cupos disponibles."
+                    )
+                contexto_datos = "\n".join(lineas) if lineas else "Actualmente no hay clases registradas."
+            except (requests.RequestException, KeyError, ValueError):
+                pass
+
+            # 2) Armamos la instrucción para Gemini incluyendo esos datos reales como contexto
             api_key = os.environ.get("GEMINI_API_KEY")
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={api_key}"
 
             instrucciones = (
                 "Eres un asistente del gimnasio FORJA. Responde de forma breve y clara "
-                "solo preguntas relacionadas con entrenamiento, rutinas, ejercicios, "
-                "nutrición deportiva y motivación para hacer ejercicio. "
-                "Si preguntan algo fuera de ese tema, responde amablemente que solo "
-                "puedes ayudar con temas de gimnasio y entrenamiento."
+                "preguntas relacionadas con entrenamiento, rutinas, ejercicios, nutrición "
+                "deportiva y motivación. Además, tienes acceso a los datos reales y actuales "
+                "de las clases del gimnasio, obtenidos en este momento desde nuestra base de datos:\n\n"
+                f"{contexto_datos}\n\n"
+                "Usa esta información cuando el usuario pregunte por disponibilidad de cupos, "
+                "instructores o clases específicas. Si preguntan algo fuera de estos temas, "
+                "responde amablemente que solo puedes ayudar con temas del gimnasio."
             )
 
             cuerpo = {
@@ -112,8 +136,40 @@ def preguntas(request):
                 respuesta = datos["candidates"][0]["content"]["parts"][0]["text"]
             except (requests.RequestException, KeyError, IndexError):
                 respuesta = "No pude conectarme con el asistente en este momento. Intenta de nuevo más tarde."
+        else:
+            respuesta = "Escribe una pregunta antes de enviar."
 
     return render(request, "gimnasio/preguntas.html", {
         "pregunta": pregunta,
         "respuesta": respuesta,
     })
+
+def clase_crear(request):
+    if request.method == "POST":
+        form = ClaseForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("gimnasio:index")
+    else:
+        form = ClaseForm()
+    return render(request, "gimnasio/clase_form.html", {"form": form, "modo": "Crear"})
+
+
+def clase_editar(request, clase_id):
+    clase = get_object_or_404(Clase, pk=clase_id)
+    if request.method == "POST":
+        form = ClaseForm(request.POST, instance=clase)
+        if form.is_valid():
+            form.save()
+            return redirect("gimnasio:detail", clase_id=clase.id)
+    else:
+        form = ClaseForm(instance=clase)
+    return render(request, "gimnasio/clase_form.html", {"form": form, "modo": "Editar"})
+
+
+def clase_eliminar(request, clase_id):
+    clase = get_object_or_404(Clase, pk=clase_id)
+    if request.method == "POST":
+        clase.delete()
+        return redirect("gimnasio:index")
+    return render(request, "gimnasio/clase_confirmar_eliminar.html", {"clase": clase})
