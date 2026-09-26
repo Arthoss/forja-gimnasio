@@ -1,4 +1,5 @@
 import requests
+import os
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -78,3 +79,41 @@ def tip_del_dia(request):
     except requests.RequestException:
         tip = tip_por_defecto
     return render(request, "gimnasio/tip_del_dia.html", {"tip": tip})
+
+def preguntas(request):
+    """Vista tipo chat: el usuario pregunta sobre rutinas/ejercicios y una IA externa responde."""
+    respuesta = None
+    pregunta = ""
+
+    if request.method == "POST":
+        pregunta = request.POST.get("pregunta", "").strip()
+
+        if pregunta:
+            api_key = os.environ.get("GEMINI_API_KEY")
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={api_key}"
+
+            instrucciones = (
+                "Eres un asistente del gimnasio FORJA. Responde de forma breve y clara "
+                "solo preguntas relacionadas con entrenamiento, rutinas, ejercicios, "
+                "nutrición deportiva y motivación para hacer ejercicio. "
+                "Si preguntan algo fuera de ese tema, responde amablemente que solo "
+                "puedes ayudar con temas de gimnasio y entrenamiento."
+            )
+
+            cuerpo = {
+                "contents": [{"parts": [{"text": pregunta}]}],
+                "systemInstruction": {"parts": [{"text": instrucciones}]},
+            }
+
+            try:
+                resp = requests.post(url, json=cuerpo, timeout=15)
+                resp.raise_for_status()
+                datos = resp.json()
+                respuesta = datos["candidates"][0]["content"]["parts"][0]["text"]
+            except (requests.RequestException, KeyError, IndexError):
+                respuesta = "No pude conectarme con el asistente en este momento. Intenta de nuevo más tarde."
+
+    return render(request, "gimnasio/preguntas.html", {
+        "pregunta": pregunta,
+        "respuesta": respuesta,
+    })

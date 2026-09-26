@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Preguntas — FORJA{% endblock %}
+{% block content %}
+<div class="wrap section">
+    <h2>Pregúntale al asistente</h2>
+    <p class="meta">Resuelve tus dudas sobre rutinas, ejercicios y entrenamiento.</p>
+
+    <form method="post" class="inscripcion">
+        {% csrf_token %}
+        <label for="pregunta">Tu pregunta:</label><br><br>
+        <input type="text" id="pregunta" name="pregunta" value="{{ pregunta }}" style="width: 100%;">
+        <br><br>
+        <input type="submit" value="Preguntar">
+    </form>
+
+    {% if respuesta %}
+    <div class="row-card" style="margin-top: 20px;">
+        <div class="title">Respuesta:</div>
+        <p>{{ respuesta }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
