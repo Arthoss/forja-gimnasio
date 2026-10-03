@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Docentes involucrados — FORJA{% endblock %}
+{% block content %}
+
+<div class="wrap section">
+    <h2>Docentes involucrados</h2>
+    <p class="meta">Docentes que acompañan el desarrollo de este proyecto.</p>
+
+    <div class="docentes-grid">
+        {% for docente in docentes %}
+            <div class="docente-card">
+                <img class="docente-foto" src="{% static docente.foto %}" alt="Foto de {{ docente.nombre }}">
+                <div class="docente-info">
+                    <div class="docente-nombre">{{ docente.nombre }}</div>
+                    <div class="docente-rol">Docente</div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

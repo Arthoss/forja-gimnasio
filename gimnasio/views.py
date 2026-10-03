@@ -224,3 +224,11 @@ def tip_eliminar(request, tip_id):
     except requests.RequestException:
         messages.error(request, "No se pudo eliminar. Intenta de nuevo en un momento.")
     return redirect("gimnasio:tip_del_dia")
+
+def docentes(request):
+    """Muestra los docentes involucrados en el proyecto."""
+    lista_docentes = [
+        {"nombre": "Elfar Didier Morantes Sanchez", "foto": "css/elfar.png"},
+        {"nombre": "Omar Andres Bonilla Acosta", "foto": "css/omar.png"},
+    ]
+    return render(request, "gimnasio/docentes.html", {"docentes": lista_docentes})
