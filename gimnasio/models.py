@@ -5,6 +5,7 @@ class Clase(models.Model):
     """Una clase que ofrece el gimnasio (ej. Spinning, Yoga, CrossFit)."""
     nombre = models.CharField(max_length=100)
     instructor = models.CharField(max_length=100)
+    sede = models.CharField(max_length=100, blank=True, default="")
     descripcion = models.TextField(blank=True)
     cupo_maximo = models.IntegerField(default=20)
     fecha_publicacion = models.DateTimeField("fecha de publicación")

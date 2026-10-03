@@ -12,6 +12,7 @@
 
     <h2>{{ clase.nombre }}</h2>
     <p class="meta">Instructor: {{ clase.instructor }} · {{ clase.cupos_disponibles }} de {{ clase.cupo_maximo }} cupos disponibles</p>
+    <p>Sede: {{ clase.sede }}</p>
     <p>{{ clase.descripcion }}</p>
 
     {% if error_message %}<div class="error">{{ error_message }}</div>{% endif %}
