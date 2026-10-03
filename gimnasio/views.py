@@ -7,6 +7,8 @@ from django.shortcuts import redirect
 from .forms import ClaseForm
 from .models import Clase, Inscripcion
 from django.urls import reverse
+from django.contrib import messages
+from django.views.decorators.http import require_POST
 
 
 def index(request):
@@ -71,15 +73,17 @@ def portada(request):
     })
 
 def tip_del_dia(request):
-    """Consume el microservicio propio (Flask + Supabase) para mostrar un tip aleatorio."""
-    url_microservicio = "https://forja-microservicio.onrender.com/api/tip"
-    tip_por_defecto = {"texto": "Entrena con constancia, los resultados llegan solos.", "categoria": "general"}
-    try:
-        respuesta = requests.get(url_microservicio, timeout=6)
-        respuesta.raise_for_status()
-        tip = respuesta.json()
-    except requests.RequestException:
-        tip = tip_por_defecto
+    """Muestra el tip recién editado (una sola vez) o uno aleatorio del Flask."""
+    tip = request.session.pop("tip_editado", None)
+    if tip is None:
+        url_microservicio = "https://forja-microservicio.onrender.com/api/tip"
+        tip_por_defecto = {"texto": "Entrena con constancia, los resultados llegan solos.", "categoria": "general"}
+        try:
+            respuesta = requests.get(url_microservicio, timeout=6)
+            respuesta.raise_for_status()
+            tip = respuesta.json()
+        except requests.RequestException:
+            tip = tip_por_defecto
     return render(request, "gimnasio/tip_del_dia.html", {"tip": tip})
 
 def preguntas(request):
@@ -168,3 +172,48 @@ def clase_eliminar(request, clase_id):
         clase.delete()
         return redirect("gimnasio:index")
     return render(request, "gimnasio/clase_confirmar_eliminar.html", {"clase": clase})
+
+RUBY_URL = os.environ.get("RUBY_URL", "https://forja-ms-actualizar.onrender.com")
+NODE_URL = os.environ.get("NODE_URL", "https://forja-ms-eliminar.onrender.com")
+
+
+@require_POST
+def tip_editar(request, tip_id):
+    """Llama al microservicio Ruby (PUT /tips/{id}) para actualizar el tip."""
+    cuerpo = {}
+    texto = request.POST.get("texto", "").strip()
+    categoria = request.POST.get("categoria", "").strip()
+    if texto:
+        cuerpo["texto"] = texto
+    if categoria:
+        cuerpo["categoria"] = categoria
+    if not cuerpo:
+        messages.error(request, "Escribe un texto y/o una categoría.")
+        return redirect("gimnasio:tip_del_dia")
+    try:
+        r = requests.put(f"{RUBY_URL}/tips/{tip_id}", json=cuerpo, timeout=25)
+        if r.status_code == 404:
+            messages.error(request, "Ese tip ya no existe.")
+            return redirect("gimnasio:tip_del_dia")
+        r.raise_for_status()
+        request.session["tip_editado"] = r.json()["tip"]
+        messages.success(request, "Tip actualizado correctamente.")
+        return redirect("gimnasio:tip_del_dia")
+    except (requests.RequestException, KeyError, ValueError):
+        messages.error(request, "No se pudo actualizar. Intenta de nuevo en un momento.")
+        return redirect("gimnasio:tip_del_dia")
+
+
+@require_POST
+def tip_eliminar(request, tip_id):
+    """Llama al microservicio Node (DELETE /tips/{id}) para eliminar el tip."""
+    try:
+        r = requests.delete(f"{NODE_URL}/tips/{tip_id}", timeout=25)
+        if r.status_code == 404:
+            messages.error(request, "Ese tip ya no existe.")
+        else:
+            r.raise_for_status()
+            messages.success(request, "Tip eliminado correctamente.")
+    except requests.RequestException:
+        messages.error(request, "No se pudo eliminar. Intenta de nuevo en un momento.")
+    return redirect("gimnasio:tip_del_dia")

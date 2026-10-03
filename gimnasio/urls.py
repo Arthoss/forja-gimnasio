@@ -13,4 +13,6 @@ urlpatterns = [
     path("clases/nueva/", views.clase_crear, name="clase_crear"),
     path("<int:clase_id>/editar/", views.clase_editar, name="clase_editar"),
     path("<int:clase_id>/eliminar/", views.clase_eliminar, name="clase_eliminar"),
+        path("tip-del-dia/<int:tip_id>/editar/", views.tip_editar, name="tip_editar"),
+    path("tip-del-dia/<int:tip_id>/eliminar/", views.tip_eliminar, name="tip_eliminar"),
 ]

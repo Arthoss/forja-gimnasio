@@ -3,7 +3,47 @@
 {% block content %}
 <div class="wrap section">
     <h2>Tip del día</h2>
+
+    {% if messages %}
+        {% for m in messages %}<p><strong>{{ m }}</strong></p>{% endfor %}
+    {% endif %}
+
     <p>{{ tip.texto }}</p>
     <p class="meta">Categoría: {{ tip.categoria }}</p>
+
+    {% if tip.id %}
+    <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="button" id="btn-editar">Editar</button>
+
+        <form method="post" action="{% url 'gimnasio:tip_eliminar' tip.id %}"
+              onsubmit="return confirm('¿Eliminar este tip?');">
+            {% csrf_token %}
+            <button type="submit">Eliminar</button>
+        </form>
+    </div>
+
+    <form id="form-editar" method="post"
+          action="{% url 'gimnasio:tip_editar' tip.id %}"
+          style="display:none; margin-top:16px;">
+        {% csrf_token %}
+        <p><textarea name="texto" rows="3" style="width:100%">{{ tip.texto }}</textarea></p>
+        <p><input type="text" name="categoria" value="{{ tip.categoria }}"></p>
+        <button type="submit">Guardar cambios</button>
+        <button type="button" id="btn-cancelar">Cancelar</button>
+    </form>
+
+    <script>
+        const form = document.getElementById("form-editar");
+        const btnEditar = document.getElementById("btn-editar");
+        btnEditar.addEventListener("click", () => {
+            form.style.display = "block";
+            btnEditar.style.display = "none";
+        });
+        document.getElementById("btn-cancelar").addEventListener("click", () => {
+            form.style.display = "none";
+            btnEditar.style.display = "inline-block";
+        });
+    </script>
+    {% endif %}
 </div>
 {% endblock %}
