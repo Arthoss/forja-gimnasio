@@ -75,16 +75,23 @@ def portada(request):
 def tip_del_dia(request):
     """Muestra el tip recién editado (una sola vez) o uno aleatorio del Flask."""
     tip = request.session.pop("tip_editado", None)
-    if tip is None:
+    if tip is not None:
+        servicio = "Ruby (Sinatra): actualizó este tip"
+    else:
         url_microservicio = "https://forja-microservicio.onrender.com/api/tip"
         tip_por_defecto = {"texto": "Entrena con constancia, los resultados llegan solos.", "categoria": "general"}
         try:
             respuesta = requests.get(url_microservicio, timeout=6)
             respuesta.raise_for_status()
             tip = respuesta.json()
+            if tip.get("origen") == "respaldo":
+                servicio = "Ruby (Sinatra): respaldo, el Flask no pudo leer la base"
+            else:
+                servicio = "Flask (Python)"
         except requests.RequestException:
             tip = tip_por_defecto
-    return render(request, "gimnasio/tip_del_dia.html", {"tip": tip})
+            servicio = "Ninguno: tip por defecto, el Flask no respondió"
+    return render(request, "gimnasio/tip_del_dia.html", {"tip": tip, "servicio": servicio})
 
 def preguntas(request):
     """Vista tipo chat: la IA responde usando el contexto real de la base de datos,
@@ -197,7 +204,7 @@ def tip_editar(request, tip_id):
             return redirect("gimnasio:tip_del_dia")
         r.raise_for_status()
         request.session["tip_editado"] = r.json()["tip"]
-        messages.success(request, "Tip actualizado correctamente.")
+        messages.success(request, "Tip actualizado correctamente (microservicio Ruby).")
         return redirect("gimnasio:tip_del_dia")
     except (requests.RequestException, KeyError, ValueError):
         messages.error(request, "No se pudo actualizar. Intenta de nuevo en un momento.")
@@ -213,7 +220,7 @@ def tip_eliminar(request, tip_id):
             messages.error(request, "Ese tip ya no existe.")
         else:
             r.raise_for_status()
-            messages.success(request, "Tip eliminado correctamente.")
+            messages.success(request, "Tip eliminado correctamente (microservicio Node.js).")
     except requests.RequestException:
         messages.error(request, "No se pudo eliminar. Intenta de nuevo en un momento.")
     return redirect("gimnasio:tip_del_dia")
