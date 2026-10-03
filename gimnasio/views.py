@@ -92,22 +92,17 @@ def preguntas(request):
         pregunta = request.POST.get("pregunta", "").strip()
 
         if pregunta:
-            # 1) Consultamos nuestro propio endpoint público para traer datos reales y actuales
-            url_clases = request.build_absolute_uri(reverse("api_lista_clases"))
-            contexto_datos = "No se pudo obtener información de las clases en este momento."
-            try:
-                resp_clases = requests.get(url_clases, timeout=8)
-                resp_clases.raise_for_status()
-                clases = resp_clases.json()
-                lineas = []
-                for c in clases:
-                    lineas.append(
-                        f"- {c['nombre']} (instructor: {c['instructor']}): "
-                        f"{c['cupos_disponibles']} de {c['cupo_maximo']} cupos disponibles."
-                    )
-                contexto_datos = "\n".join(lineas) if lineas else "Actualmente no hay clases registradas."
-            except (requests.RequestException, KeyError, ValueError):
-                pass
+            # 1) Leemos los datos reales de la base de datos
+            lineas = []
+            for c in Clase.objects.all():
+                lineas.append(
+                    f"- {c.nombre} (instructor: {c.instructor}): "
+                    f"{c.cupos_disponibles()} de {c.cupo_maximo} cupos disponibles."
+                )
+            contexto_datos = "\n".join(lineas) if lineas else "Actualmente no hay clases registradas."
+
+            # 2) Armamos la instrucción para Gemini incluyendo esos datos reales como contexto
+            api_key = os.environ.get("GEMINI_API_KEY")
 
             # 2) Armamos la instrucción para Gemini incluyendo esos datos reales como contexto
             api_key = os.environ.get("GEMINI_API_KEY")
